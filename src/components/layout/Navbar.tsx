@@ -29,11 +29,6 @@ const navItems: NavItem[] = [
         href: "/compendium",
         icon: Book,
     },
-    {
-        title: "Kütüphane", // Compendium
-        href: "/compendium",
-        icon: Book,
-    },
 ];
 
 import { User } from "@supabase/supabase-js";
