@@ -52,6 +52,7 @@ create table public.characters (
   current_hp integer default 10,
   max_hp integer default 10,
   armor_class integer default 10,
+  image_url text, -- URL to character portrait
   
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -91,3 +92,51 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Table: features (All class/race features)
+create table public.features (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  description text not null,
+  source_type text not null check (source_type in ('Race', 'Class', 'Background')),
+  source_id uuid, -- Can link to classes.id or races.id if needed, or kept loose
+  level_required integer default 1,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Table: spells (All spells)
+create table public.spells (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  description text not null,
+  level integer not null, -- 0 for Cantrip
+  school text,
+  casting_time text,
+  range text,
+  components text,
+  duration text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Table: class_spells (Linking classes to spells)
+create table public.class_spells (
+  class_id uuid references public.classes(id) on delete cascade not null,
+  spell_id uuid references public.spells(id) on delete cascade not null,
+  primary key (class_id, spell_id)
+);
+
+-- Table: class_features (Linking classes to features)
+create table public.class_features (
+  class_id uuid references public.classes(id) on delete cascade not null,
+  feature_id uuid references public.features(id) on delete cascade not null,
+  level_custom integer, -- If a class gets it at a different level than default
+  primary key (class_id, feature_id)
+);
+
+-- RLS Policies
+alter table public.features enable row level security;
+create policy "Features are viewable by everyone" on public.features for select using (true);
+
+alter table public.spells enable row level security;
+create policy "Spells are viewable by everyone" on public.spells for select using (true);
+

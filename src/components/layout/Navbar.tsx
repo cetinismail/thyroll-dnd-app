@@ -7,9 +7,18 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Sword, Book, Zap } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import { useState } from "react";
 
-const navItems = [
+interface NavItem {
+    title: string;
+    href: string;
+    icon: LucideIcon;
+    disabled?: boolean;
+    badge?: string;
+}
+
+const navItems: NavItem[] = [
     {
         title: "Panel", // Dashboard
         href: "/dashboard",
@@ -21,11 +30,9 @@ const navItems = [
         icon: Book,
     },
     {
-        title: "Oluşturucu", // Builder
-        href: "/builder",
-        icon: Zap,
-        disabled: true,
-        badge: "Beta",
+        title: "Kütüphane", // Compendium
+        href: "/compendium",
+        icon: Book,
     },
 ];
 
@@ -40,6 +47,7 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SearchCommand } from "@/components/search-command";
 
 export function Navbar({ user }: { user?: User | null }) {
     const pathname = usePathname();
@@ -134,16 +142,7 @@ export function Navbar({ user }: { user?: User | null }) {
                 {/* Right Interactions */}
                 <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
                     <div className="w-full flex-1 md:w-auto md:flex-none">
-                        {/* Search Placeholder */}
-                        <Button
-                            variant="outline"
-                            className="relative h-8 w-full justify-start rounded-[0.5rem] bg-background text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64"
-                        >
-                            <span className="inline-flex">Bilgi ara...</span>
-                            <kbd className="pointer-events-none absolute right-[0.3rem] top-[0.3rem] hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                                <span className="text-xs">⌘</span>K
-                            </kbd>
-                        </Button>
+                        <SearchCommand />
                     </div>
                     <div className="flex items-center gap-2">
                         {user ? (

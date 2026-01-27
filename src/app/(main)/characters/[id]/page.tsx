@@ -26,17 +26,35 @@ export default async function CharacterDetailPage(props: { params: Promise<{ id:
     }
 
     // 2. Fetch Character Details with relations
+    // 2. Fetch Character Details with relations (and new relations)
     const { data: character, error } = await supabase
         .from('characters')
-        .select('*, races(*), classes(*)')
+        .select(`
+            *,
+            races(*),
+            classes(*),
+            classes!inner (
+                class_features (
+                    features (*)
+                ),
+                class_spells (
+                    spells (*)
+                )
+            )
+        `)
         .eq('id', params.id)
-        .eq('user_id', user.id) // Security check: must belong to user
+        .eq('user_id', user.id)
         .single();
 
     if (error || !character) {
         console.error("Fetch error:", error);
         notFound();
     }
+
+    // Extract features and spells correctly
+    // The nested structure will be: character.classes.class_features[].features
+    const features = character.classes?.class_features?.map((cf: any) => cf.features) || [];
+    const spells = character.classes?.class_spells?.map((cs: any) => cs.spells) || [];
 
     // Helper to calculate modifier: (Score - 10) / 2, rounded down
     const getModifier = (score: number) => Math.floor((score - 10) / 2);
@@ -74,10 +92,19 @@ export default async function CharacterDetailPage(props: { params: Promise<{ id:
                 <div className="md:col-span-1 space-y-6">
                     <Card className="border-primary/20 bg-card/60">
                         <CardHeader className="text-center pb-4">
-                            <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4 border-2 border-primary/20">
-                                <span className="font-cinzel text-3xl text-primary font-bold">
-                                    {character.name.charAt(0)}
-                                </span>
+                            <div className="mx-auto w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mb-4 border-2 border-primary/20 overflow-hidden relative shadow-lg">
+                                {character.image_url ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={character.image_url}
+                                        alt={character.name}
+                                        className="w-full h-full object-cover transition-transform hover:scale-105"
+                                    />
+                                ) : (
+                                    <span className="font-cinzel text-5xl text-primary font-bold">
+                                        {character.name.charAt(0)}
+                                    </span>
+                                )}
                             </div>
                             <CardTitle className="font-cinzel text-2xl">{character.name}</CardTitle>
                             <CardDescription className="text-base font-medium text-foreground/80">
@@ -91,8 +118,9 @@ export default async function CharacterDetailPage(props: { params: Promise<{ id:
                             <div className="grid grid-cols-2 gap-4 text-center">
                                 <div className="p-3 bg-muted/50 rounded-lg">
                                     <div className="text-sm text-muted-foreground uppercase text-[10px] tracking-wider">AC</div>
-                                    <div className="text-xl font-bold font-mono">10</div>
-                                    {/* AC calculation logic to be added later */}
+                                    <div className="text-xl font-bold font-mono text-primary">
+                                        {character.armor_class || 10}
+                                    </div>
                                 </div>
                                 <div className="p-3 bg-muted/50 rounded-lg">
                                     <div className="text-sm text-muted-foreground uppercase text-[10px] tracking-wider">HP</div>
@@ -128,44 +156,18 @@ export default async function CharacterDetailPage(props: { params: Promise<{ id:
                     </div>
                 </div>
 
-                {/* Right Column: Details, Bio, Spells etc */}
-                <div className="md:col-span-2 space-y-6">
-
-                    {/* Story / Bio */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-cinzel text-lg">Karakter Hikayesi</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div>
-                                <h4 className="text-sm font-semibold mb-1">Geçmiş</h4>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                    {character.background || "Bu karakterin hikayesi henüz yazılmamış."}
-                                </p>
-                            </div>
-                            <div className="pt-4 border-t">
-                                <h4 className="text-sm font-semibold mb-1">Görünüm</h4>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                    {character.appearance || "Görünüm tasviri yok."}
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Class Features (Placeholder) */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-cinzel text-lg">Sınıf Özellikleri</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-sm text-muted-foreground italic">
-                                Sınıf özellikleri şimdilik veritabanından çekilmiyor. Buraya ileride {character.classes.name} yetenekleri gelecek.
-                            </div>
-                        </CardContent>
-                    </Card>
-
+                {/* Right Column: Tabbed Content */}
+                <div className="md:col-span-2">
+                    <CharacterTabs
+                        character={character}
+                        features={features}
+                        spells={spells}
+                    />
                 </div>
             </div>
         </div>
     );
 }
+
+// Client Component for Tabs
+import { CharacterTabs } from "@/app/(main)/characters/[id]/tabs-client";

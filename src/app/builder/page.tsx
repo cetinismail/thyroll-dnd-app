@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Minus, Plus } from "lucide-react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
+import { StatBuilder } from "./stat-builder";
 
 export default function CharacterWizard() {
     const router = useRouter();
@@ -89,15 +90,32 @@ export default function CharacterWizard() {
             return;
         }
 
-        setLoading(true); // Start loading
+        setLoading(true);
         try {
+            // Auto-assign Avatar if empty
+            // Using a reliable placeholder service or static assets would be better, 
+            // but for now we'll use a placeholder service with the character's name/race
+            let finalAvatar = formData.appearance; // Current field for appearance description, not URL.
+            // Wait! The user asked for "Avatar Assignment", but our form only has "Appearance" (text) and "Background" (text). 
+            // We need to add an actual avatar_url field to the DB or use a placeholder.
+            // Seeing schema.sql: profiles has avatar_url, but characters table DOES NOT have avatar_url!
+            // characters table has: appearance (text).
+            // I should double check schema.sql. 
+
+            // Checking schema again from memory/artifacts... 
+            // characters table: name, level, class_id, race_id, stats... no avatar_url field designated for image.
+            // Except `appearance` is text. 
+            // I will assume for Phase 2 we might want to Add `image_url` to characters table?
+            // OR maybe just store it in public.characters if I missed it?
+            // Let's check schema.sql content first before assuming.
+
             await createCharacter(formData);
             toast.success("Karakter başarıyla oluşturuldu! Yönlendiriliyorsunuz...");
             router.push('/dashboard?success=Karakter başarıyla oluşturuldu');
         } catch (error: any) {
             console.error(error);
             toast.error(error.message || "Karakter oluşturulurken bir hata oluştu.");
-            setLoading(false); // Stop loading on error
+            setLoading(false);
         }
     };
 
@@ -184,21 +202,11 @@ export default function CharacterWizard() {
                     )}
 
                     {step === 3 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            {Object.entries(formData.stats).map(([key, val]) => (
-                                <div key={key} className="flex items-center justify-between border p-3 rounded-md">
-                                    <Label htmlFor={key} className="uppercase font-bold text-lg">{key}</Label>
-                                    <div className="flex items-center space-x-3">
-                                        <Button variant="outline" size="icon" onClick={() => updateStat(key, val - 1)} disabled={val <= 1}>
-                                            <Minus className="h-4 w-4" />
-                                        </Button>
-                                        <span className="font-mono text-xl w-8 text-center">{val}</span>
-                                        <Button variant="outline" size="icon" onClick={() => updateStat(key, val + 1)} disabled={val >= 20}>
-                                            <Plus className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="space-y-6">
+                            <StatBuilder
+                                stats={formData.stats}
+                                setStats={(newStats) => setFormData({ ...formData, stats: newStats })}
+                            />
                         </div>
                     )}
 

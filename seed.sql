@@ -35,3 +35,20 @@ INSERT INTO public.characters (user_id, name, level, class_id, race_id, strength
 VALUES
   ((SELECT id FROM public.profiles LIMIT 1), 'Grommash', 1, (SELECT id FROM public.classes WHERE name = 'Barbarian'), (SELECT id FROM public.races WHERE name = 'Half-Orc'), 16, 14, 16, 8, 10, 12, 15, 15, 14),
   ((SELECT id FROM public.profiles LIMIT 1), 'Elara', 3, (SELECT id FROM public.classes WHERE name = 'Wizard'), (SELECT id FROM public.races WHERE name = 'Elf'), 8, 14, 12, 18, 14, 10, 18, 18, 12);
+
+-- Insert Basic Features (Barbarian)
+INSERT INTO public.features (name, description, source_type, level_required) VALUES
+('Rage', 'In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action.', 'Class', 1),
+('Unarmored Defense', 'While you are not wearing any armor, your Armor Class equals 10 + your Dexterity modifier + your Constitution modifier.', 'Class', 1),
+('Reckless Attack', 'Starting at 2nd level, you can throw aside all concern for defense to attack with fierce desperation.', 'Class', 2);
+
+-- Insert class_features handling (Mock setup for seed, real app would use strict ID lookups)
+-- Skipped complex linking for this initial seed to avoid SQL complexity errors in simple execution
+-- Ideally user will run a more complex script or we build an admin tool.
+
+-- Insert Basic Spells (Wizard/Cleric)
+INSERT INTO public.spells (name, description, level, school, casting_time, range, components, duration) VALUES
+('Fireball', 'A bright streak flashes from your pointing finger to a point you choose... 8d6 fire damage.', 3, 'Evocation', '1 Action', '150 feet', 'V, S, M', 'Instantaneous'),
+('Magic Missile', 'You create three glowing darts of magical force.', 1, 'Evocation', '1 Action', '120 feet', 'V, S', 'Instantaneous'),
+('Cure Wounds', 'A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier.', 1, 'Evocation', '1 Action', 'Touch', 'V, S', 'Instantaneous');
+

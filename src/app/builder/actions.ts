@@ -42,7 +42,10 @@ export async function createCharacter(formData: any) {
         // Mock data for now as these are not in wizard yet
         level: 1,
         current_hp: 10, // Should be calculated based on class + con
-        max_hp: 10
+        max_hp: 10,
+        background: formData.background,
+        appearance: formData.appearance,
+        image_url: formData.image_url
     })
 
     if (error) {
