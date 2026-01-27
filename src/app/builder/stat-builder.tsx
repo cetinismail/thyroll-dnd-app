@@ -95,7 +95,7 @@ export function StatBuilder({ stats, setStats }: StatBuilderProps) {
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="pointbuy">Puan Satın Alma</TabsTrigger>
                     <TabsTrigger value="standard">Standart Dizi</TabsTrigger>
-                    <TabsTrigger value="manual">Manuel / Zar</TabsTrigger>
+                    <TabsTrigger value="manual">Manuel Giriş</TabsTrigger>
                 </TabsList>
 
                 {/* --- POINT BUY --- */}
