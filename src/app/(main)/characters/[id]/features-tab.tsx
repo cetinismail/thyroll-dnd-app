@@ -21,9 +21,11 @@ interface FeaturesTabProps {
 export function FeaturesTab({ features, className }: FeaturesTabProps) {
     if (features.length === 0) {
         return (
-            <div className="text-center py-10 text-muted-foreground bg-muted/20 rounded-xl border border-dashed">
-                <Shield className="h-10 w-10 mx-auto mb-3 opacity-20" />
-                <p>Bu seviyede henüz aktif bir özellik yok veya veritabanı bağlantısı yapılmadı.</p>
+            <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-muted rounded-lg bg-card/50 min-h-[200px]">
+                <Shield className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                <p className="text-muted-foreground text-center max-w-[300px]">
+                    Bu seviyede veya bu sınıf/ırk için henüz görüntülenecek bir özellik bulunmuyor.
+                </p>
             </div>
         );
     }

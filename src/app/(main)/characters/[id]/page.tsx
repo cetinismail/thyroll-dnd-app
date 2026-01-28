@@ -15,6 +15,8 @@ import { notFound, redirect } from "next/navigation";
 import { DeleteCharacterButton } from "./delete-button";
 import { EditCharacterDialog } from "./edit-dialog";
 
+import { CharacterTabs } from "@/app/(main)/characters/[id]/tabs-client";
+
 export default async function CharacterDetailPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     const supabase = await createClient();
@@ -26,14 +28,13 @@ export default async function CharacterDetailPage(props: { params: Promise<{ id:
     }
 
     // 2. Fetch Character Details with relations
-    // 2. Fetch Character Details with relations (and new relations)
     const { data: character, error } = await supabase
         .from('characters')
         .select(`
             *,
             races(*),
-            classes(*),
-            classes!inner (
+            classes (
+                *,
                 class_features (
                     features (*)
                 ),
@@ -53,8 +54,61 @@ export default async function CharacterDetailPage(props: { params: Promise<{ id:
 
     // Extract features and spells correctly
     // The nested structure will be: character.classes.class_features[].features
-    const features = character.classes?.class_features?.map((cf: any) => cf.features) || [];
-    const spells = character.classes?.class_spells?.map((cs: any) => cs.spells) || [];
+    // Extract features and spells correctly
+    // The nested structure will be: character.classes.class_features[].features
+    const allFeatures = character.classes?.class_features?.map((cf: any) => cf.features) || [];
+    const allSpells = character.classes?.class_spells?.map((cs: any) => cs.spells) || [];
+
+    // --- FILTER CONFIGURATION ---
+
+    // 1. Filter Features by Level
+    const features = allFeatures.filter((f: any) => f.level_required <= character.level);
+
+    // 2. Filter Spells by Max Spell Level
+    const getCasterType = (className: string) => {
+        const fullCasters = ["Bard", "Cleric", "Druid", "Sorcerer", "Wizard"];
+        const halfCasters = ["Paladin", "Ranger"];
+        const warlock = ["Warlock"];
+
+        if (fullCasters.includes(className)) return "full";
+        if (halfCasters.includes(className)) return "half";
+        if (warlock.includes(className)) return "warlock";
+        return "none";
+    };
+
+    const getMaxSpellLevel = (className: string, level: number) => {
+        const type = getCasterType(className);
+
+        if (type === "none") return 0; // No spells
+        if (type === "full") return Math.ceil(level / 2);
+
+        if (type === "half") {
+            if (level < 2) return 0;
+            return Math.ceil(level / 2); // Roughly approximates up to 5th level spells
+        }
+
+        if (type === "warlock") {
+            // Warlock Progression
+            if (level >= 9) return 5;
+            return Math.ceil(level / 2);
+        }
+
+        return 0;
+    };
+
+    const maxSpellLevel = getMaxSpellLevel(character.classes.name, character.level);
+
+    // Special Case: Allow Cantrips (Level 0) for Casters, but pure martials usually don't have them unless subclass (which we don't distinguish yet).
+    // If MaxSpellLevel is 0, we can assume no spells at all for simplicity, OR allow Cantrips if present.
+    // For Paladin/Ranger at Level 1 (Max 0), they shouldn't see spells.
+    // For Wizard 1 (Max 1), they see 0 and 1.
+
+    let spells = allSpells.filter((s: any) => s.level <= maxSpellLevel);
+
+    // If "none" caster, empty completely (ignore database defaults if any)
+    if (getCasterType(character.classes.name) === "none") {
+        spells = [];
+    }
 
     // Helper to calculate modifier: (Score - 10) / 2, rounded down
     const getModifier = (score: number) => Math.floor((score - 10) / 2);
@@ -169,5 +223,4 @@ export default async function CharacterDetailPage(props: { params: Promise<{ id:
     );
 }
 
-// Client Component for Tabs
-import { CharacterTabs } from "@/app/(main)/characters/[id]/tabs-client";
+

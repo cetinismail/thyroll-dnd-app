@@ -7,6 +7,21 @@ import { redirect } from 'next/navigation'
 export async function deleteCharacter(characterId: string) {
     const supabase = await createClient()
 
+    // 1. Manually cleanup inventory first to avoid RLS restrictions blocking the cascade
+    // (Sometimes deleting the parent makes the child's RLS check fail if it relies on the parent)
+    const { error: invError } = await supabase
+        .from('character_inventory')
+        .delete()
+        .eq('character_id', characterId)
+
+    if (invError) {
+        console.error('Error deleting inventory:', invError)
+        // We continue trying to delete the character even if this "fails" 
+        // (maybe it failed because empty, or maybe real error)
+        // But usually we want to ensure character is deleted.
+    }
+
+    // 2. Delete the Character
     const { error } = await supabase
         .from('characters')
         .delete()

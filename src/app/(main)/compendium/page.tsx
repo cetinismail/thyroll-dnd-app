@@ -1,31 +1,67 @@
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, Skull, Sword } from "lucide-react";
+import Link from "next/link";
+
 const categories = [
-    { title: "Büyüler", key: "Spells" },
-    { title: "Canavarlar", key: "Monsters" },
-    { title: "Sınıflar", key: "Classes" },
-    { title: "Irklar", key: "Races" },
-    { title: "Eşyalar", key: "Items" },
-    { title: "Yetenekler", key: "Feats" },
+    {
+        title: "Büyüler",
+        description: "Arcane ve Divine büyülerin tam listesi.",
+        icon: BookOpen,
+        href: "/compendium/spells",
+        color: "text-blue-500",
+        bg: "bg-blue-500/10",
+    },
+    {
+        title: "Canavarlar",
+        description: "D&D evrenindeki yaratıklar ve özellikleri.",
+        icon: Skull,
+        href: "/compendium/monsters",
+        color: "text-red-500",
+        bg: "bg-red-500/10",
+    },
+    {
+        title: "Eşyalar",
+        description: "Silahlar, zırhlar ve büyülü eşyalar.",
+        icon: Sword,
+        href: "/compendium/items",
+        color: "text-amber-500",
+        bg: "bg-amber-500/10",
+    },
 ];
 
 export default function CompendiumPage() {
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col space-y-2">
-                <h1 className="text-3xl font-bold font-cinzel text-primary">Kütüphane</h1>
+        <div className="container mx-auto py-8 space-y-8">
+            <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tight">Kütüphane</h1>
                 <p className="text-muted-foreground">
-                    Diyarın kurallarını, büyülerini ve canavarlarını keşfet.
+                    Dungeons & Dragons 5e referans kaynaklarına buradan ulaşabilirsiniz.
                 </p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {categories.map((category) => (
-                    <div key={category.key} className="group relative overflow-hidden rounded-xl border border-border/40 bg-card/50 transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                        <div className="p-6">
-                            <h3 className="text-xl font-bold font-cinzel mb-2 group-hover:text-primary transition-colors">{category.title}</h3>
-                            <p className="text-sm text-muted-foreground">Tüm resmi <span className="text-foreground/80 font-medium">{category.key}</span> kayıtlarını incele.</p>
-                        </div>
-                    </div>
+                    <Link key={category.title} href={category.href} className="block group">
+                        <Card className="h-full transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1">
+                            <CardHeader>
+                                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${category.bg} ${category.color}`}>
+                                    <category.icon className="w-6 h-6" />
+                                </div>
+                                <CardTitle className="group-hover:text-primary transition-colors">
+                                    {category.title}
+                                </CardTitle>
+                                <CardDescription>
+                                    {category.description}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <span className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                                    İncele &rarr;
+                                </span>
+                            </CardContent>
+                        </Card>
+                    </Link>
                 ))}
             </div>
         </div>

@@ -18,7 +18,8 @@ create table public.classes (
   description text,
   hit_die text not null, -- e.g. "d8", "d10"
   primary_ability text not null, -- e.g. "Strength", "Intelligence"
-  saves text[] -- Array of saving throws e.g. ["Constitution", "Intelligence"]
+  saves text[], -- Array of saving throws e.g. ["Constitution", "Intelligence"]
+  starting_equipment jsonb
 );
 
 -- Table: races (D&D Races e.g. Human, Elf)
@@ -52,7 +53,10 @@ create table public.characters (
   current_hp integer default 10,
   max_hp integer default 10,
   armor_class integer default 10,
+  background text,
+  appearance text,
   image_url text, -- URL to character portrait
+  currency jsonb default '{"gp": 0, "sp": 0, "cp": 0}',
   
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -115,6 +119,7 @@ create table public.spells (
   range text,
   components text,
   duration text,
+  translation jsonb,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -139,4 +144,108 @@ create policy "Features are viewable by everyone" on public.features for select 
 
 alter table public.spells enable row level security;
 create policy "Spells are viewable by everyone" on public.spells for select using (true);
+
+-- Table: monsters
+create table public.monsters (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  size text,
+  type text,
+  subtype text,
+  alignment text,
+  armor_class integer,
+  armor_class_desc text,
+  hit_points integer,
+  hit_dice text,
+  speed_json jsonb,
+  strength integer,
+  dexterity integer,
+  constitution integer,
+  intelligence integer,
+  wisdom integer,
+  charisma integer,
+  challenge_rating numeric,
+  special_abilities_json jsonb,
+  actions_json jsonb,
+  legendary_actions_json jsonb,
+  image_url text,
+  translation jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Table: items
+create table public.items (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  equipment_category text,
+  rarity text default 'Common',
+  cost_desc text,
+  weight numeric,
+  description text,
+  properties_json jsonb,
+  image_url text,
+  translation jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Add translation to spells if not executing full create
+-- (This part simulates the alter commands in schema doc if we wanted to be precise, 
+-- but usually schema.sql represents final state. Let's update spells table definition too)
+
+-- RLS for new tables
+alter table public.monsters enable row level security;
+alter table public.items enable row level security;
+
+create policy "Items are viewable by everyone" on public.items for select using (true);
+
+
+-- Table: character_inventory
+create table public.character_inventory (
+  id uuid default uuid_generate_v4() primary key,
+  character_id uuid references public.characters(id) on delete cascade not null,
+  item_id uuid references public.items(id) on delete cascade not null,
+  quantity integer default 1 check (quantity > 0),
+  is_equipped boolean default false,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS for character_inventory
+alter table public.character_inventory enable row level security;
+
+create policy "Users can view own character inventory" on public.character_inventory
+  for select using (
+    exists (
+      select 1 from public.characters
+      where characters.id = character_inventory.character_id
+      and characters.user_id = auth.uid()
+    )
+  );
+
+create policy "Users can insert into own character inventory" on public.character_inventory
+  for insert with check (
+    exists (
+      select 1 from public.characters
+      where characters.id = character_inventory.character_id
+      and characters.user_id = auth.uid()
+    )
+  );
+
+create policy "Users can update own character inventory" on public.character_inventory
+  for update using (
+    exists (
+      select 1 from public.characters
+      where characters.id = character_inventory.character_id
+      and characters.user_id = auth.uid()
+    )
+  );
+
+create policy "Users can delete from own character inventory" on public.character_inventory
+  for delete using (
+    exists (
+      select 1 from public.characters
+      where characters.id = character_inventory.character_id
+      and characters.user_id = auth.uid()
+    )
+  );
+
 

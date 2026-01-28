@@ -3,45 +3,60 @@
 import { useState } from "react";
 import { FeaturesTab } from "./features-tab";
 import { SpellsTab } from "./spells-tab";
+import InventoryTab from "./InventoryTab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Book, Shield, ScrollText } from "lucide-react";
+import { Book, Shield, ScrollText, Backpack } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function CharacterTabs({ character, features, spells }: { character: any, features: any[], spells: any[] }) {
-    const [activeTab, setActiveTab] = useState<"features" | "spells" | "bio">("features");
+    const [activeTab, setActiveTab] = useState<"features" | "spells" | "inventory" | "bio">("features");
 
     return (
         <div className="space-y-6">
             {/* Tab Navigation */}
-            <div className="flex p-1 bg-muted/50 rounded-lg">
+            <div className="flex p-1 bg-muted/50 rounded-lg overflow-x-auto">
                 <Button
                     variant="ghost"
                     onClick={() => setActiveTab("features")}
                     className={cn(
-                        "flex-1 gap-2 rounded-md font-cinzel text-base transition-all",
+                        "flex-1 gap-2 rounded-md font-cinzel text-base transition-all min-w-[100px]",
                         activeTab === "features" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
                     )}
                 >
                     <Shield className="h-4 w-4" />
                     Özellikler
                 </Button>
+
+                {spells.length > 0 && (
+                    <Button
+                        variant="ghost"
+                        onClick={() => setActiveTab("spells")}
+                        className={cn(
+                            "flex-1 gap-2 rounded-md font-cinzel text-base transition-all min-w-[100px]",
+                            activeTab === "spells" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                        )}
+                    >
+                        <Book className="h-4 w-4" />
+                        Büyüler
+                    </Button>
+                )}
                 <Button
                     variant="ghost"
-                    onClick={() => setActiveTab("spells")}
+                    onClick={() => setActiveTab("inventory")}
                     className={cn(
-                        "flex-1 gap-2 rounded-md font-cinzel text-base transition-all",
-                        activeTab === "spells" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                        "flex-1 gap-2 rounded-md font-cinzel text-base transition-all min-w-[100px]",
+                        activeTab === "inventory" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
                     )}
                 >
-                    <Book className="h-4 w-4" />
-                    Büyüler
+                    <Backpack className="h-4 w-4" />
+                    Envanter
                 </Button>
                 <Button
                     variant="ghost"
                     onClick={() => setActiveTab("bio")}
                     className={cn(
-                        "flex-1 gap-2 rounded-md font-cinzel text-base transition-all",
+                        "flex-1 gap-2 rounded-md font-cinzel text-base transition-all min-w-[100px]",
                         activeTab === "bio" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
                     )}
                 >
@@ -74,6 +89,17 @@ export function CharacterTabs({ character, features, spells }: { character: any,
                     </Card>
                 )}
 
+                {activeTab === "inventory" && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-cinzel">Envanter</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <InventoryTab characterId={character.id} />
+                        </CardContent>
+                    </Card>
+                )}
+
                 {activeTab === "bio" && (
                     <Card>
                         <CardHeader>
@@ -96,6 +122,6 @@ export function CharacterTabs({ character, features, spells }: { character: any,
                     </Card>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

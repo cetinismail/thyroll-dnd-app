@@ -25,18 +25,21 @@ export default async function DashboardPage({
         redirect("/login");
     }
 
-    // 2. Fetch Stats & Characters parallely
+    // 2. Fetch Stats, Characters & News parallely
     const [
         { count: characterCount, error: countError },
-        { data: recentCharacters, error: listError }
+        { data: recentCharacters, error: listError },
+        { data: newsItems, error: newsError }
     ] = await Promise.all([
         supabase.from('characters').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-        supabase.from('characters').select('*, races(name), classes(name)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5)
+        supabase.from('characters').select('*, races(name), classes(name)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+        supabase.from('news').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(5)
     ]);
 
     // Handle errors silently or log them
     if (countError) console.error("Dashboard Stats Error:", countError);
     if (listError) console.error("Dashboard List Error:", listError);
+    if (newsError && newsError.code !== '42P01') console.error("Dashboard News Error:", newsError); // Ignore table missing error locally if migration not run
 
     return (
         <div className="space-y-8">
@@ -137,10 +140,16 @@ export default async function DashboardPage({
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            <div className="border-l-2 border-primary pl-4">
-                                <h4 className="text-sm font-bold text-foreground">Sistem Güncellemesi v1.0</h4>
-                                <p className="text-xs text-muted-foreground mt-1">Thyroll temelleri atıldı. Beta aşamasına hoş geldin.</p>
-                            </div>
+                            {newsItems && newsItems.length > 0 ? (
+                                newsItems.map((news: any) => (
+                                    <div key={news.id} className="border-l-2 border-primary pl-4">
+                                        <h4 className="text-sm font-bold text-foreground">{news.title}</h4>
+                                        <p className="text-xs text-muted-foreground mt-1">{news.content}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground">Henüz güncelleme notu yok.</p>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

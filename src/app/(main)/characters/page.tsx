@@ -8,7 +8,7 @@ import {
     CardTitle,
     CardFooter
 } from "@/components/ui/card";
-import { PlusCircle, Search, Sword, Users, Trash2, Edit } from "lucide-react";
+import { PlusCircle, Search, Sword, Users, Trash2, Edit, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -94,7 +94,10 @@ export default async function CharactersPage() {
                             </CardContent>
                             <CardFooter className="pt-4 border-t border-border/20 flex gap-2">
                                 <Link href={`/characters/${char.id}`} className="flex-1">
-                                    <Button variant="outline" className="w-full">Detaylar</Button>
+                                    <Button variant="secondary" className="w-full group font-medium hover:bg-primary/20 hover:text-primary transition-all duration-300">
+                                        Detaylar
+                                        <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </Button>
                                 </Link>
                                 {/* Edit and Delete buttons will be hooked up later */}
                                 {/* 
