@@ -52,3 +52,10 @@ INSERT INTO public.spells (name, description, level, school, casting_time, range
 ('Magic Missile', 'You create three glowing darts of magical force.', 1, 'Evocation', '1 Action', '120 feet', 'V, S', 'Instantaneous'),
 ('Cure Wounds', 'A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier.', 1, 'Evocation', '1 Action', 'Touch', 'V, S', 'Instantaneous');
 
+
+-- Insert News (v1.0, v1.1, v1.2)
+INSERT INTO public.news (title, content, version, created_at)
+VALUES 
+('Sistem Güncellemesi v1.0', 'Thyroll temelleri atıldı. Beta aşamasına hoş geldin.', 'v1.0', now() - interval '2 days'),
+('Sistem Güncellemesi v1.1', 'Karakter özellikleri, büyü kütüphanesi ve envanter sistemi tamamlandı. Artık karakterleriniz çok daha detaylı!', 'v1.1', now() - interval '1 day'),
+('Sistem Güncellemesi v1.2', '3D Zar Sistemi yayında! Artık karakter oluştururken gerçekçi fizik motoruyla zar atabilir (4d6 Drop Lowest) ve sonuçları anlık görebilirsiniz.', 'v1.2', now());
