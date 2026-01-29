@@ -16,6 +16,7 @@ import { DeleteCharacterButton } from "./delete-button";
 import { EditCharacterDialog } from "./edit-dialog";
 
 import { CharacterTabs } from "@/app/(main)/characters/[id]/tabs-client";
+import { SkillsList } from "@/components/character/SkillsList";
 
 export default async function CharacterDetailPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
@@ -207,6 +208,18 @@ export default async function CharacterDetailPage(props: { params: Promise<{ id:
                                 </div>
                             )
                         })}
+                    </div>
+
+                    {/* Skills List */}
+                    <div className="mt-8">
+                        <SkillsList stats={{
+                            str: character.strength,
+                            dex: character.dexterity,
+                            con: character.constitution,
+                            int: character.intelligence,
+                            wis: character.wisdom,
+                            cha: character.charisma
+                        }} />
                     </div>
                 </div>
 

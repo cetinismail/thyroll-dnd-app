@@ -1,0 +1,72 @@
+/* d20.css */
+.scene {
+  width: 100px;
+  height: 100px;
+  perspective: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.d20 {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  transform-style: preserve-3d;
+  transition: transform 1s ease-out;
+}
+
+.d20.rolling {
+  animation: roll 0.5s linear infinite;
+}
+
+.d20-result-overlay {
+    position: absolute;
+    z-index: 10;
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 10px black;
+    animation: popIn 0.3s ease-out forwards;
+}
+
+@keyframes popIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+@keyframes roll {
+  0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
+  100% { transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg); }
+}
+
+/* Faces */
+.face {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  border-bottom: 52px solid rgba(220, 20, 60, 0.8); /* Crimson */
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  color: white;
+  font-family: sans-serif;
+  font-size: 14px;
+  padding-bottom: 5px;
+  backface-visibility: hidden; /* Optimization */
+}
+
+/* 
+  Constructing an Icosahedron in CSS is math-heavy. 
+  For this quick iteration, we might use a "Pseudo-3D" spinning image 
+  OR a single simplified 3D shape (e.g. rotating cube styled as D20?).
+  
+  To save time and ensure robustness without 500 lines of CSS transforms:
+  We will use a high-quality GIF/Video for the "Rolling" state, 
+  and a static SVG of a D20 for the "Result" state.
+  This gives the "Premium" look without the WebGL weight or CSS math headache.
+*/
+
+/* Resetting the approach for maximum visual impact with minimum code complexity */

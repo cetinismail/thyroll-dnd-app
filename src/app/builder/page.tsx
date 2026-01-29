@@ -112,19 +112,30 @@ export default function CharacterWizard() {
 
     return (
         <div className="container max-w-3xl py-10">
-            <div className="mb-8 relative">
-                <Link href="/dashboard" className="absolute left-0 top-1">
-                    <Button variant="ghost" size="sm">
+            <div className="mb-8 relative flex flex-col md:block items-center">
+                <Link href="/dashboard" className="self-start md:absolute md:left-0 md:top-1 mb-4 md:mb-0">
+                    <Button variant="ghost" size="sm" className="pl-0 md:pl-4">
                         ← Panel'e Dön
                     </Button>
                 </Link>
-                <h1 className="text-3xl font-cinzel font-bold text-center">Karakter Oluşturucu</h1>
+                <h1 className="text-3xl font-cinzel font-bold text-center w-full">Karakter Oluşturucu</h1>
                 <div className="flex justify-center mt-2 space-x-2">
                     {/* Progress Indicator */}
                     {[1, 2, 3, 4, 5, 6].map((i) => (
                         <div key={i} className={`h-2 w-16 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`} />
                     ))}
                 </div>
+            </div>
+
+            {/* Navigation Buttons (Top) */}
+            <div className="flex justify-between mb-4 px-1">
+                <Button variant="outline" onClick={prevStep} disabled={step === 1}>Geri</Button>
+
+                {step < 6 ? (
+                    <Button onClick={nextStep}>İleri</Button>
+                ) : (
+                    <Button className="bg-primary text-primary-foreground" onClick={handleSubmit}>Karakteri Oluştur</Button>
+                )}
             </div>
 
             <Card>
@@ -253,15 +264,7 @@ export default function CharacterWizard() {
                     )}
                 </CardContent>
 
-                <CardFooter className="flex justify-between">
-                    <Button variant="outline" onClick={prevStep} disabled={step === 1}>Geri</Button>
-
-                    {step < 6 ? (
-                        <Button onClick={nextStep}>İleri</Button>
-                    ) : (
-                        <Button className="bg-primary text-primary-foreground" onClick={handleSubmit}>Karakteri Oluştur</Button>
-                    )}
-                </CardFooter>
+                {/* CardFooter removed as buttons are moved to top */}
             </Card>
         </div>
     );

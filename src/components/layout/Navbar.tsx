@@ -29,6 +29,12 @@ const navItems: NavItem[] = [
         href: "/compendium",
         icon: Book,
     },
+    {
+        title: "Seferler",
+        href: "/dashboard/campaigns",
+        icon: Sword,
+        badge: "Yeni",
+    },
 ];
 
 import { User } from "@supabase/supabase-js";
